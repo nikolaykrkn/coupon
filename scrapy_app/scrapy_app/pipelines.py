@@ -6,13 +6,12 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 
-from main.models import CouponItem
+from main.models import CouponItem, Retailer, CrawlSite
 import json
 
 class ScrapyAppPipeline(object):
     def __init__(self, unique_id, *args, **kwargs):
         self.unique_id = unique_id
-        self.items = []
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -20,13 +19,13 @@ class ScrapyAppPipeline(object):
             unique_id=crawler.settings.get('unique_id'), # this will be passed from django view
         )
 
-    def close_spider(self, spider):
-        # And here we are saving our crawled data with django models.
-        item = CouponItem()
-        item.unique_id = self.unique_id
-        item.data = json.dumps(self.items)
-        item.save()
-
     def process_item(self, item, spider):
-        self.items.append(item['url'])
+        new_item = CouponItem()
+        new_item.unique_id = self.unique_id
+        new_item.promo_code = item['promo_code']
+        crawlsite = CrawlSite.objects.get(title='groupon.com')
+        retailer = Retailer.objects.get(title='tjmaxx.tjx.com')
+        new_item.retailer = retailer
+        new_item.crawlsite = crawlsite
+        new_item.save()
         return item
