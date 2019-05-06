@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import Retailer, CrawlSite, CouponItem
+from .models import Retailer, CouponSite, CouponItem
 
 
 admin.site.register(Retailer)
-admin.site.register(CrawlSite)
+admin.site.register(CouponSite)
 admin.site.register(CouponItem)

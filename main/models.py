@@ -10,16 +10,19 @@ STATUS_CHOICES = (
 )
 
 
-class Retailer(models.Model):
+class CouponSite(models.Model):
     title = models.CharField(max_length=50, null=True)
+    link = models.CharField(max_length=50, null=True)
 
     def __str__(self):
         return self.title
 
 
-class CrawlSite(models.Model):
+class Retailer(models.Model):
     title = models.CharField(max_length=50, null=True)
-    path = models.CharField(max_length=50, null=True)
+    link = models.CharField(max_length=50, null=True)
+    coupon_site = models.ForeignKey(CouponSite, on_delete=models.CASCADE, null=True)
+    coupon_link = models.CharField(max_length=50, null=True) # coupon page link for coupon site
 
     def __str__(self):
         return self.title
@@ -28,23 +31,22 @@ class CrawlSite(models.Model):
 class CouponItem(models.Model):
     unique_id = models.CharField(max_length=100, null=True)
     promo_code = models.CharField(max_length=100, null=True)
-    last_verified_date = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    last_verified_date = models.DateTimeField(null=True)
     retailer = models.OneToOneField(Retailer, on_delete=models.CASCADE, null=True)
-    crawlsite = models.OneToOneField(CrawlSite, on_delete=models.CASCADE, null=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
 
     class Meta:
-        verbose_name = "scrapped Coupon"
+        verbose_name = "scrapped coupon"
     
-    @property
     def to_dict(self):
         data = {
             'promo_code': self.promo_code,
-            'last_verified': self.get_last_verified_by_min
+            'last_verified': self.get_last_verified_by_min,
+            'retailer': self.retailer.title,
+            'coupon': self.retailer.coupon_site.title
         }
         return data
 
-    @property
     def get_last_verified_by_min(self):
         now = datetime.now()
         diff = (now - self.last_verified_date).total_seconds / 60.0

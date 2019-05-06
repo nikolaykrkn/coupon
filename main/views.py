@@ -1,13 +1,17 @@
 from uuid import uuid4
 from urllib.parse import urlparse
+from django.http import JsonResponse
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
-from django.views.decorators.http import require_POST, require_http_methods
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+
+from rest_framework import generics
+from rest_framework import permissions, status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
 from scrapyd_api import ScrapydAPI
-from main.models import CouponItem
+from main.models import CouponItem, Retailer, CouponSite
+from .serializers import CouponItemSerializer
 
 # connect scrapyd service
 scrapyd = ScrapydAPI('http://localhost:6800')
@@ -23,19 +27,16 @@ def is_valid_url(url):
     return True
 
 
-@csrf_exempt
-@require_http_methods(['POST', 'GET']) # only get and post
-def crawl(request):
-    # Post requests are for new crawling tasks
-    if request.method == 'POST':
+class CouponItemView(APIView):
+    permission_classes = (permissions.AllowAny,)
+    serializer_class = CouponItemSerializer
 
-        url = request.POST.get('url', None) # take url comes from client. (From an input may be?)
-
-        if not url:
-            return JsonResponse({'error': 'Missing  args'})
+    def put(self, request):
         
-        if not is_valid_url(url):
-            return JsonResponse({'error': 'URL is invalid'})
+        retailers = Retailer.objects.all()
+        for retailer in retailers:
+            if not is_valid_url(retailer.link):
+                continue
         
         domain = urlparse(url).netloc # parse the url and extract the domain
         unique_id = str(uuid4()) # create a unique ID. 
@@ -58,30 +59,45 @@ def crawl(request):
 
         return JsonResponse({'task_id': task, 'unique_id': unique_id, 'status': 'started' })
 
-    # Get requests are for getting result of a specific crawling task
-    elif request.method == 'GET':
-        # We were passed these from past request above. Remember ?
-        # They were trying to survive in client side.
-        # Now they are here again, thankfully. <3
-        # We passed them back to here to check the status of crawling
-        # And if crawling is completed, we respond back with a crawled data.
-        task_id = request.GET.get('task_id', None)
-        unique_id = request.GET.get('unique_id', None)
+    Get requests are for getting result of a specific crawling task
+    def get(self, request):
+        retailers = request.data.get('retailers', [])
+        # coupons = CouponItem.objects.filter(retailer_title__in=retailers)
+        coupons = CouponItem.objects.all()
+        serializer = self.serializer_class(coupons, many=True)
+        return Response(serializer.data)
 
-        if not task_id or not unique_id:
-            return JsonResponse({'error': 'Missing args'})
+    #     # We were passed these from past request above. Remember ?
+    #     # They were trying to survive in client side.
+    #     # Now they are here again, thankfully. <3
+    #     # We passed them back to here to check the status of crawling
+    #     # And if crawling is completed, we respond back with a crawled data.
+    #     # task_id = request.GET.get('task_id', None)
+    #     # unique_id = request.GET.get('unique_id', None)
 
-        # Here we check status of crawling that just started a few seconds ago.
-        # If it is finished, we can query from database and get results
-        # If it is not finished we can return active status
-        # Possible results are -> pending, running, finished
-        status = scrapyd.job_status('default', task_id)
-        if status == 'finished':
-            try:
-                # this is the unique_id that we created even before crawling started.
-                item = CouponItem.objects.get(unique_id=unique_id) 
-                return JsonResponse({'data': item.to_dict['data']})
-            except Exception as e:
-                return JsonResponse({'error': str(e)})
-        else:
-            return JsonResponse({'status': status})
+    #     # if not task_id or not unique_id:
+    #     #     return JsonResponse({'error': 'Missing args'})
+
+    #     # Here we check status of crawling that just started a few seconds ago.
+    #     # If it is finished, we can query from database and get results
+    #     # If it is not finished we can return active status
+    #     # Possible results are -> pending, running, finished
+    #     # status = scrapyd.job_status('default', task_id)
+    #     # if status == 'finished':
+    
+    # def get(self, request, pk):
+    #     coupon_list = CouponItem.objects.all() 
+    #     data = PollSerializer(poll).data
+    #     return Response(data)
+    #     # Call the base implementation first to get the context
+    #     context = super(CouponListView, self).get_context_data(**kwargs)
+    #     # Create any data and add it to the context
+    #     try:
+    #         # this is the unique_id that we created even before crawling started.
+            
+    #         context['coupons'] = coupons
+    #     except Exception as e:
+    #         context['coupons'] = str(e)
+    #     return context
+    
+        

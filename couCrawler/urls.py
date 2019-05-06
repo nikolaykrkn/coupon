@@ -19,5 +19,5 @@ from main import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.crawl, name='crawl')
+    path('', views.CouponItemView.as_view(), name='coupon_list')
 ]
