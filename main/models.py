@@ -3,10 +3,18 @@ from datetime import datetime
 from django.db import models
 from django.utils import timezone
 
-STATUS_CHOICES = (
-    ("valid", "Valid"),
-    ("invalid", "Invalid"),
-    ("expired", "Expired")
+COUPON_STATUS_CHOICES = (
+    ("UNVERIFIED", "unverified"),
+    ("VALID", "valid"),
+    ("INVALID", "invalid"),
+    ("EXPIRED", "expired")
+)
+
+TASK_STATUS_CHOICES = (
+    ("STARTED", "started"),
+    ("PENDING", "pending"),
+    ("RUNNING", "running"),
+    ("FINISHED", "finished")
 )
 
 
@@ -33,7 +41,7 @@ class CouponItem(models.Model):
     promo_code = models.CharField(max_length=100, null=True)
     last_verified_date = models.DateTimeField(null=True)
     retailer = models.OneToOneField(Retailer, on_delete=models.CASCADE, null=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=10, choices=COUPON_STATUS_CHOICES, default="UNVERIFIED")
 
     class Meta:
         verbose_name = "scrapped coupon"
@@ -54,3 +62,12 @@ class CouponItem(models.Model):
 
     def __str__(self):
         return self.promo_code
+
+
+class CrawlTask(models.Model):
+    task_id = models.CharField(max_length=100, null=True)
+    unique_id = models.CharField(max_length=100, null=True)
+    status = models.CharField(max_length=10, choices=TASK_STATUS_CHOICES)
+
+    def __str__(self):
+        return self.task_id + self.status

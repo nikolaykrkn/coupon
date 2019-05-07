@@ -19,7 +19,7 @@ class ScrapyAppPipeline(object):
         )
 
     def process_item(self, item, spider):
-        retailer = Retailer.objects.get(title='TJ Maxx')
+        retailer = Retailer.objects.get(title=item['title'])
         new_item, created = CouponItem.objects.update_or_create(
             retailer=retailer,
             defaults = {

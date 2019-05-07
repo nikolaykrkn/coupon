@@ -1,6 +1,6 @@
 import scrapy
 from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import CrawlSpider
 from scrapy.http import HtmlResponse
 from bs4 import BeautifulSoup
 import requests
@@ -13,16 +13,15 @@ class CoucrawlerSpider(CrawlSpider):
     name = 'coucrawler'
     
     def __init__(self, *args, **kwargs):
+        import pdb; pdb.set_trace()
         
-        self.domain = 'groupon.com' # kwargs.get('domain')
-        self.url = 'https://groupon.com' # kwargs.get('url')
-        self.coupon_page = '/coupons/stores/tjmaxx' #kwargs.get('coupon_page)
+        self.domain = kwargs.get('domain')
+        self.title = kwargs.get('title')
+        self.url = kwargs.get('url')
+        self.coupon_page = kwargs.get('coupon_page')
         self.page_url = self.url + self.coupon_page
         self.start_urls = [self.url]
         self.allowed_domains = [self.domain]
-        # CoucrawlerSpider.rules = [
-        #    Rule(LinkExtractor(unique=True), callback='parse_item'),
-        # ]
         super(CoucrawlerSpider, self).__init__(*args, **kwargs)
         
     def parse(self, response):
@@ -43,6 +42,7 @@ class CoucrawlerSpider(CrawlSpider):
                 coupon = data["state"]["stores_slug"]["coupons"][1]["code"]
                 if coupon != '':
                     item['promo_code'] = coupon
+                    item['title'] = self.title
                     break
 
         return item
