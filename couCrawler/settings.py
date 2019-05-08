@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'main',
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -121,3 +122,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+CRONJOBS = [
+    ('*/30 * * * *', 'main.views.start_crawling')
+]

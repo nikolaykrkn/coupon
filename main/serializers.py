@@ -5,7 +5,7 @@ from .models import CouponItem, Retailer, CouponSite
 class CouponItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CouponItem
-        fields = '__all__'
+        fields = ('promo_code', 'title', 'retailer', 'last_verified_date', 'status', 'coupon_from', 'expires_at',)
 
 
 class RetailerSerializer(serializers.ModelSerializer):
