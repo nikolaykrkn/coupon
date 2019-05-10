@@ -1,8 +1,8 @@
-# Scraping Coupon Project - Backend.
+# Scraping Coupon Project - Django/Scrapy Backend.
 
 Status: **In Development**
 
-## Startup Guide
+## Startup Guide for local deployement
 
 Activate virtualenv and install all the packages
 ```
