@@ -90,8 +90,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', 
         'NAME': 'coupon',
         'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '/opt/lampp/var/mysql/mysql.sock',   # Or an IP Address that your DB is hosted on
+        'PASSWORD': 'root',
+        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
     }
 }
