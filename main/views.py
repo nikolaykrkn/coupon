@@ -1,6 +1,6 @@
 from uuid import uuid4
 from urllib.parse import urlparse
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
@@ -88,6 +88,7 @@ def start_crawling(self):
             task = scrapyd.schedule('default', 'coucrawler',
                                     settings=settings, url=url, domain=domain, retailer=retailer_title,
                                     page_link=page_link)
+    return HttpResponse(200)
 
 
 def check_task_status():
