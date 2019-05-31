@@ -35,6 +35,8 @@ def run():
             retailer_title = retailer.title
             page_link = coupon_site.page_link
 
+            scrape_url = coupon_site.page_link + retailer.slug_id
+
             # This is the custom settings for scrapy spider. 
             # We can send anything we want to use it inside spiders and pipelines. 
             # I mean, anything
@@ -48,4 +50,4 @@ def run():
             # This returns a ID which belongs and will be belong to this task
             
             task = scrapyd.schedule('default', 'coucrawler', 
-                settings=settings, url=url, domain=domain, retailer=retailer_title, page_link=page_link)
+                settings=settings, url=url, domain=domain, retailer=retailer_title, page_link=page_link, scrape_url=scrape_url)
