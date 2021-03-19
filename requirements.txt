@@ -11,7 +11,7 @@ cssselect==1.0.3
 Django==2.2
 django-crontab==0.7.1
 django-extensions==2.1.6
-djangorestframework==3.9.3
+djangorestframework==3.11.2
 hyperlink==19.0.0
 idna==2.8
 incremental==17.5.0
